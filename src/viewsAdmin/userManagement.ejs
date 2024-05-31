@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý người dùng</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <h1>Quản lý người dùng</h1>
+    <button class="btn btn-primary" data-toggle="modal" data-target="#addUserModal">Thêm người dùng</button>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>STT</th>
+                <th>Tên người dùng</th>
+                <th>Email</th>
+                <th>Vai trò</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% users.forEach((user, index) => { %>
+            <tr>
+                <td><%= index + 1 %></td>
+                <td><%= user.name %></td>
+                <td><%= user.email %></td>
+                <td><%= user.role %></td>
+                <td><%= user.status %></td>
+                <td>
+                    <button class="btn btn-warning" data-toggle="modal" data-target="#editUserModal<%= user._id %>">Sửa</button>
+                    <button class="btn btn-danger" onclick="deleteUser('<%= user._id %>')">Xóa</button>
+                    <button class="btn btn-secondary" onclick="toggleUserStatus('<%= user._id %>')">
+                        <%= user.status === 'active' ? 'Khóa' : 'Mở khóa' %>
+                    </button>
+                </td>
+            </tr>
+            <!-- Modal Sửa người dùng -->
+            <div class="modal fade" id="editUserModal<%= user._id %>" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editUserModalLabel">Sửa người dùng</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form action="/admin/users/edit/<%= user._id %>" method="post">
+                                <div class="form-group">
+                                    <label for="name">Tên người dùng</label>
+                                    <input type="text" class="form-control" name="name" value="<%= user.name %>" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="email">Email</label>
+                                    <input type="email" class="form-control" name="email" value="<%= user.email %>" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="role">Vai trò</label>
+                                    <select class="form-control" name="role">
+                                        <option value="admin" <%= user.role === 'admin' ? 'selected' : '' %>>Admin</option>
+                                        <option value="user" <%= user.role === 'user' ? 'selected' : '' %>>User</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <% }); %>
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal Thêm người dùng -->
+<div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addUserModalLabel">Thêm người dùng</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="/admin/users/add" method="post">
+                    <div class="form-group">
+                        <label for="name">Tên người dùng</label>
+                        <input type="text" class="form-control" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Mật khẩu</label>
+                        <input type="password" class="form-control" name="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="role">Vai trò</label>
+                        <select class="form-control" name="role">
+                            <option value="admin">Admin</option>
+                            <option value="user">User</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Thêm người dùng</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function deleteUser(userId) {
+        if (confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
+            fetch(`/admin/users/delete/${userId}`, { method: 'DELETE' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra khi xóa người dùng.');
+                    }
+                });
+        }
+    }
+
+    function toggleUserStatus(userId) {
+        // Thêm logic để khóa/mở khóa người dùng
+    }
+</script>
+</body>
+</html>
